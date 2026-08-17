@@ -5,8 +5,8 @@
     "yawSensitivity": 1.0,
     "pitchSensitivity": 1.0,
     "rollSensitivity": 1.0,
-    "smoothing": 0.0,
-    "adaptiveSmoothing": true,
+    "localSmoothing": 0.0,
+    "remoteSmoothing": 0.15,
     "positionEnabled": true,
     "positionSensitivityX": 4.0,
     "positionSensitivityY": 4.0,
@@ -15,7 +15,6 @@
     "positionLimitY": 0.20,
     "positionLimitZ": 0.40,
     "positionLimitZBack": 0.0,
-    "positionSmoothing": 0.15,
     "neckModelEnabled": false,
     "neckModelHeight": 0.10,
     "neckModelForward": 0.08

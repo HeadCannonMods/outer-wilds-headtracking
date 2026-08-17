@@ -8,7 +8,7 @@ An **unofficial** head tracking mod for Outer Wilds that lets you look around na
 
 - **Decoupled look + aim**: Look around freely with your head while your aim stays independent
 - **6DOF head tracking**: Yaw, pitch, roll rotation plus positional tracking (lean in/out/side-to-side) via OpenTrack UDP protocol
-- **Adaptive smoothing**: Automatically adjusts smoothing for WiFi/remote connections to reduce jitter
+- **Per-connection smoothing**: Separate smoothing for a tracker on this machine and for a remote WiFi device, picked from the packet source address
 - **Smart auto-disable**: Tracking automatically pauses during model ship piloting, signalscope zoom, and pause menu
 - **Full game integration**: Flashlight follows your gaze, Nomai Translator targets where you look, quantum objects respect head-tracked view direction
 
@@ -34,7 +34,7 @@ See [INSTALL.md](INSTALL.md) for detailed manual installation instructions.
 
 This mod receives tracking data via the OpenTrack UDP protocol (port 4242 by default). You can use a phone or webcam with [OpenTrack](https://github.com/opentrack/opentrack) or any OpenTrack-compatible head tracking software.
 
-The mod automatically detects remote connections (e.g., phone over WiFi) and applies smoothing to compensate for network jitter.
+The mod detects whether the tracking data comes from this machine or from a remote device (e.g. phone over WiFi) and applies `localSmoothing` or `remoteSmoothing` accordingly.
 
 ## Controls
 
@@ -63,8 +63,8 @@ Settings are available in the OWML Mod Manager or in-game mod menu. The mod crea
 | `yawSensitivity` | 1.0 | Horizontal look sensitivity |
 | `pitchSensitivity` | 1.0 | Vertical look sensitivity |
 | `rollSensitivity` | 1.0 | Head tilt sensitivity |
-| `smoothing` | 0.0 | Manual smoothing (0 = none, 1 = max) |
-| `adaptiveSmoothing` | true | Auto-apply smoothing for remote/WiFi connections |
+| `localSmoothing` | 0.0 | Smoothing when the tracker runs on this machine (loopback). 0 = none, 1 = heavy |
+| `remoteSmoothing` | 0.15 | Smoothing when the tracker is a remote device on the network. 0 = none, 1 = heavy |
 | `positionEnabled` | true | Enable positional tracking (lean in/out/side-to-side) |
 | `positionSensitivityX` | 4.0 | Lateral position multiplier |
 | `positionSensitivityY` | 4.0 | Vertical position multiplier |
@@ -72,7 +72,8 @@ Settings are available in the OWML Mod Manager or in-game mod menu. The mod crea
 | `positionLimitX` | 0.30 | Max lateral displacement (meters) |
 | `positionLimitY` | 0.20 | Max vertical displacement (meters) |
 | `positionLimitZ` | 0.40 | Max depth displacement (meters) |
-| `positionSmoothing` | 0.15 | Position smoothing factor |
+
+Position uses the same `localSmoothing` / `remoteSmoothing` value as rotation; there is no separate position smoothing setting.
 
 ## Building from Source
 

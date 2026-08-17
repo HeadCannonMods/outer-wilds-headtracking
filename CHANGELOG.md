@@ -1,5 +1,13 @@
 # Changelog
 
+## [Unreleased]
+
+### Changed
+
+- Replace the `smoothing` setting with `localSmoothing` (default 0.0) and `remoteSmoothing` (default 0.15), selected per connection from the packet source address
+- Remove `adaptiveSmoothing` and `positionSmoothing`: position now uses the same connection-selected value as rotation
+- Remove the hidden 0.15 baseline smoothing floor, so local trackers get zero-latency tracking by default
+
 ## [1.2.3] - 2026-08-07
 
 ### Fixed

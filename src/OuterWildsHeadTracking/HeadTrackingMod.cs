@@ -37,8 +37,11 @@ namespace OuterWildsHeadTracking
         public static float YawSensitivity = 1.0f;
         public static float PitchSensitivity = 1.0f;
         public static float RollSensitivity = 1.0f;
-        public static float Smoothing = 0.0f;
-        public static bool AdaptiveSmoothing = true;
+        // Smoothing is picked per connection from the packet source address:
+        // loopback senders get LocalSmoothing, remote network devices get RemoteSmoothing.
+        // Both cover rotation and position.
+        public static float LocalSmoothing = 0.0f;
+        public static float RemoteSmoothing = 0.15f;
 
         // Position settings
         public static bool PositionEnabled = true;
@@ -49,7 +52,6 @@ namespace OuterWildsHeadTracking
         public static float PositionLimitY = 0.20f;
         public static float PositionLimitZ = 0.40f;
         public static float PositionLimitZBack = 0.0f;
-        public static float PositionSmoothing = 0.15f;
 
         public new IModHelper? ModHelper { get; private set; }
 
@@ -93,7 +95,7 @@ namespace OuterWildsHeadTracking
                 var helper = ModHelper;
                 if (_trackingClient.Initialize(msg => helper.Console.WriteLine($"[HeadTracking] {msg}", MessageType.Info)))
                 {
-                    ModHelper.Console.WriteLine($"[HeadTracking] Initialized (Home=recenter, End=toggle, PgUp=position, smoothing={Smoothing})", MessageType.Info);
+                    ModHelper.Console.WriteLine($"[HeadTracking] Initialized (Home=recenter, End=toggle, PgUp=position, smoothing local={LocalSmoothing} remote={RemoteSmoothing})", MessageType.Info);
                 }
                 else
                 {
@@ -258,13 +260,14 @@ namespace OuterWildsHeadTracking
             YawSensitivity = (float)ModHelper.Config.GetSettingsValue<double>("yawSensitivity");
             PitchSensitivity = (float)ModHelper.Config.GetSettingsValue<double>("pitchSensitivity");
             RollSensitivity = (float)ModHelper.Config.GetSettingsValue<double>("rollSensitivity");
-            Smoothing = (float)ModHelper.Config.GetSettingsValue<double>("smoothing");
-            AdaptiveSmoothing = ModHelper.Config.GetSettingsValue<bool>("adaptiveSmoothing");
+            LocalSmoothing = (float)ModHelper.Config.GetSettingsValue<double>("localSmoothing");
+            RemoteSmoothing = (float)ModHelper.Config.GetSettingsValue<double>("remoteSmoothing");
 
             if (YawSensitivity <= 0) YawSensitivity = 1.0f;
             if (PitchSensitivity <= 0) PitchSensitivity = 1.0f;
             if (RollSensitivity <= 0) RollSensitivity = 1.0f;
-            Smoothing = UnityCoreModule::UnityEngine.Mathf.Clamp01(Smoothing);
+            LocalSmoothing = UnityCoreModule::UnityEngine.Mathf.Clamp01(LocalSmoothing);
+            RemoteSmoothing = UnityCoreModule::UnityEngine.Mathf.Clamp01(RemoteSmoothing);
 
             // Position settings
             PositionEnabled = ModHelper.Config.GetSettingsValue<bool>("positionEnabled");
@@ -275,11 +278,9 @@ namespace OuterWildsHeadTracking
             PositionLimitY = (float)ModHelper.Config.GetSettingsValue<double>("positionLimitY");
             PositionLimitZ = (float)ModHelper.Config.GetSettingsValue<double>("positionLimitZ");
             PositionLimitZBack = (float)ModHelper.Config.GetSettingsValue<double>("positionLimitZBack");
-            PositionSmoothing = (float)ModHelper.Config.GetSettingsValue<double>("positionSmoothing");
             if (PositionSensitivityX <= 0) PositionSensitivityX = 2.0f;
             if (PositionSensitivityY <= 0) PositionSensitivityY = 2.0f;
             if (PositionSensitivityZ <= 0) PositionSensitivityZ = 2.0f;
-            PositionSmoothing = UnityCoreModule::UnityEngine.Mathf.Clamp01(PositionSmoothing);
 
             // Update processor settings when config changes
             _trackingClient?.UpdateProcessorSettings();

@@ -298,7 +298,12 @@ namespace OuterWildsHeadTracking.Camera.Core
                 pitch *= headTrackingInfluence;
                 roll *= headTrackingInfluence;
 
-                float smoothing = SmoothingUtils.GetEffectiveSmoothing(HeadTrackingMod.Smoothing);
+                // Locality is re-read every frame, so swapping a local tracker for a
+                // remote one switches parameter without restarting the game.
+                float smoothing = SmoothingUtils.GetEffectiveSmoothing(
+                    HeadTrackingMod.LocalSmoothing,
+                    HeadTrackingMod.RemoteSmoothing,
+                    trackingClient!.IsRemoteSource);
 
                 _smoothedYaw = SmoothingUtils.Smooth(_smoothedYaw, yaw, smoothing, deltaTime);
                 _smoothedPitch = SmoothingUtils.Smooth(_smoothedPitch, pitch, smoothing, deltaTime);

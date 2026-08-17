@@ -38,10 +38,12 @@ namespace OuterWildsHeadTracking.Tracking
             _receiver = new CameraUnlock.Core.Protocol.OpenTrackReceiver();
             if (log != null) _receiver.Log = log;
 
-            // Initialize processor with smoothing disabled (SimpleCameraPatch does quaternion Slerp)
+            // Initialize processor with smoothing disabled (SimpleCameraPatch applies the
+            // connection-selected smoothing itself on the composed rotation)
             _processor = new TrackingProcessor
             {
-                SmoothingFactor = 0f,
+                LocalSmoothing = 0f,
+                RemoteSmoothing = 0f,
                 Deadzone = DeadzoneSettings.None
             };
 
@@ -74,7 +76,7 @@ namespace OuterWildsHeadTracking.Tracking
 
             if (_positionProcessor != null)
             {
-                _positionProcessor.Settings = new PositionSettings(
+                _positionProcessor.Settings = PositionSettings.Symmetric(
                     HeadTrackingMod.PositionSensitivityX,
                     HeadTrackingMod.PositionSensitivityY,
                     HeadTrackingMod.PositionSensitivityZ,
@@ -82,7 +84,8 @@ namespace OuterWildsHeadTracking.Tracking
                     HeadTrackingMod.PositionLimitY,
                     HeadTrackingMod.PositionLimitZ,
                     HeadTrackingMod.PositionLimitZBack,
-                    HeadTrackingMod.PositionSmoothing,
+                    localSmoothing: HeadTrackingMod.LocalSmoothing,
+                    remoteSmoothing: HeadTrackingMod.RemoteSmoothing,
                     invertX: true, invertY: false, invertZ: true
                 );
             }
@@ -90,7 +93,8 @@ namespace OuterWildsHeadTracking.Tracking
 
         /// <summary>
         /// Returns true if the tracking data is coming from a remote host (not localhost).
-        /// Used for adaptive smoothing - remote connections over WiFi may need smoothing.
+        /// Selects which smoothing parameter applies: LocalSmoothing for loopback senders,
+        /// RemoteSmoothing for a remote network device.
         /// </summary>
         public bool IsRemoteSource
         {
@@ -125,6 +129,10 @@ namespace OuterWildsHeadTracking.Tracking
             {
                 return Vec3.Zero;
             }
+
+            // Re-read locality every frame so switching between a local tracker and a
+            // remote device picks up the other smoothing parameter without a restart.
+            _positionProcessor.IsRemoteConnection = _receiver.IsRemoteConnection;
 
             var rawPos = _receiver.GetLatestPosition();
             var interpolatedPos = _positionInterpolator.Update(rawPos, deltaTime);

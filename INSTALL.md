@@ -76,9 +76,9 @@ You need a head tracking source that sends data via the OpenTrack UDP protocol.
 
 ### Camera jittering
 
-1. Enable **Adaptive Smoothing** in mod settings (enabled by default)
-2. If using WiFi, ensure good signal strength
-3. Increase the **Smoothing** value in mod settings
+1. If using WiFi, ensure good signal strength
+2. Increase **remoteSmoothing** in mod settings (applies to a phone or other remote device)
+3. If the tracker runs on this PC, increase **localSmoothing** instead
 
 ### Tracking feels inverted
 
@@ -100,8 +100,8 @@ Access mod settings through:
 | **yawSensitivity** | Left/right look multiplier |
 | **pitchSensitivity** | Up/down look multiplier |
 | **rollSensitivity** | Head tilt multiplier |
-| **smoothing** | Smoothing amount (0-1) |
-| **adaptiveSmoothing** | Auto-smooth for WiFi connections |
+| **localSmoothing** | Smoothing for a tracker on this machine (0-1, default 0.0) |
+| **remoteSmoothing** | Smoothing for a remote network device (0-1, default 0.15) |
 
 ## Firewall Configuration
 
