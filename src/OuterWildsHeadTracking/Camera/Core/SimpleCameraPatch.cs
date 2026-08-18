@@ -338,10 +338,16 @@ namespace OuterWildsHeadTracking.Camera.Core
                     posOffset = new Vec3(posOffset.X, posOffset.Y, posOffset.Z * zAtten);
 
                     Vec3 scaledPos = posOffset * headTrackingInfluence;
-                    _lastPositionOffset = scaledPos;
+
+                    // Negative z is the forward lean throughout the pipeline, and the
+                    // asymmetric clamp is built on that. Unity's transform +z is forward, so
+                    // the flip belongs here, at the boundary. Everything downstream reads
+                    // _lastPositionOffset, including the prefixes that subtract it back off,
+                    // so this is the single place the two conventions meet.
+                    _lastPositionOffset = new Vec3(scaledPos.X, scaledPos.Y, -scaledPos.Z);
 
                     _cameraTransform.localPosition += new Vector3(
-                        scaledPos.X, scaledPos.Y, scaledPos.Z);
+                        _lastPositionOffset.X, _lastPositionOffset.Y, _lastPositionOffset.Z);
                     _positionOffsetApplied = true;
                 }
             }
