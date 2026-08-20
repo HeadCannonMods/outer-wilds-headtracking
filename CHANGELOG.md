@@ -1,5 +1,16 @@
 # Changelog
 
+## [1.3.0] - 2026-08-20
+
+### Added
+
+- drop mod-side centring, let the tracker app own the centre
+
+### Fixed
+
+- migrate to the per-connection smoothing pair
+- give the forward lean its own travel budget again
+
 ## [Unreleased]
 
 ### Added
