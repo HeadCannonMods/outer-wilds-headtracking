@@ -2,11 +2,20 @@
 
 ## [Unreleased]
 
+### Added
+
+- Name the UDP port in the startup log line, and point the troubleshooting steps
+  at `%APPDATA%\OuterWildsModManager\OWML\Logs\latest.txt` so a bug report has
+  one file to attach
+
 ### Changed
 
 - Replace the `smoothing` setting with `localSmoothing` (default 0.0) and `remoteSmoothing` (default 0.15), selected per connection from the packet source address
 - Remove `adaptiveSmoothing` and `positionSmoothing`: position now uses the same connection-selected value as rotation
 - Remove the hidden 0.15 baseline smoothing floor, so local trackers get zero-latency tracking by default
+- Remove all mod-side recentring: the `Home` / `Ctrl+Shift+T` hotkey, the tracker-app
+  recenter request handling and the centre offset. The tracker app owns the centre, so
+  the mod now applies the incoming pose as absolute. Centre the view in your tracking app
 
 ## [1.2.3] - 2026-08-07
 

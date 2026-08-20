@@ -95,11 +95,11 @@ namespace OuterWildsHeadTracking
                 var helper = ModHelper;
                 if (_trackingClient.Initialize(msg => helper.Console.WriteLine($"[HeadTracking] {msg}", MessageType.Info)))
                 {
-                    ModHelper.Console.WriteLine($"[HeadTracking] Initialized (Home=recenter, End=toggle, PgUp=position, smoothing local={LocalSmoothing} remote={RemoteSmoothing})", MessageType.Info);
+                    ModHelper.Console.WriteLine($"[HeadTracking] Initialized, listening on UDP port {port} (End=toggle, PgUp=position, smoothing local={LocalSmoothing} remote={RemoteSmoothing})", MessageType.Info);
                 }
                 else
                 {
-                    ModHelper.Console.WriteLine("[HeadTracking] Failed to initialize", MessageType.Warning);
+                    ModHelper.Console.WriteLine($"[HeadTracking] Failed to bind UDP port {port}", MessageType.Warning);
                 }
 
                 // Listen for model ship events to disable head tracking during model ship control
@@ -118,11 +118,10 @@ namespace OuterWildsHeadTracking
 
         private void Update()
         {
-            if (_trackingClient?.TryConsumeRecenterRequest() == true)
-            {
-                global::OuterWildsHeadTracking.Camera.Core.SimpleCameraPatch.RecenterTracking();
-                ModHelper?.Console.WriteLine("[HeadTracking] Recentered by tracker app", MessageType.Info);
-            }
+            // Ahead of the input handling below, and outside the camera patch's
+            // gameplay gates: packet arrival has to be visible in the log while
+            // the player is in a menu, paused, or has tracking toggled off.
+            _trackingClient?.LogConnectionOnce();
 
             // Unity's InputSystem can throw InvalidOperationException during scene transitions
             // when the keyboard device is being reconfigured. This is expected behavior and
@@ -135,18 +134,14 @@ namespace OuterWildsHeadTracking
                 bool chord = (keyboard.leftCtrlKey.isPressed || keyboard.rightCtrlKey.isPressed)
                           && (keyboard.leftShiftKey.isPressed || keyboard.rightShiftKey.isPressed);
 
-                // Recenter: Home or Ctrl+Shift+T
-                if (keyboard.homeKey.wasPressedThisFrame
-                    || (chord && keyboard.tKey.wasPressedThisFrame))
-                {
-                    global::OuterWildsHeadTracking.Camera.Core.SimpleCameraPatch.RecenterTracking();
-                }
-
                 // Toggle tracking: End or Ctrl+Shift+Y
                 if (keyboard.endKey.wasPressedThisFrame
                     || (chord && keyboard.yKey.wasPressedThisFrame))
                 {
                     _trackingEnabled = !_trackingEnabled;
+                    ModHelper?.Console.WriteLine(
+                        $"[HeadTracking] Tracking {(_trackingEnabled ? "enabled" : "disabled")}",
+                        MessageType.Info);
                 }
 
                 // Cycle tracking mode: Page Up or Ctrl+Shift+G

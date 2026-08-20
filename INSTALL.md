@@ -60,9 +60,8 @@ You need a head tracking source that sends data via the OpenTrack UDP protocol.
 1. Start your tracking app and verify it's sending data
 2. Launch Outer Wilds through the mod manager
 3. Load your save or start a new game
-4. Look straight ahead at your monitor
-5. Press **Home** to set your center position
-6. Move your head - you should see the camera respond
+4. Look straight ahead at your monitor and centre the view in your tracking app
+5. Move your head - you should see the camera respond
 
 ## Troubleshooting
 
@@ -73,6 +72,12 @@ You need a head tracking source that sends data via the OpenTrack UDP protocol.
 3. If using WiFi, ensure your phone is on the same network as your PC
 4. Check Windows Firewall - allow UDP port 4242 for inbound connections
 5. Press **End** to ensure tracking is enabled (not toggled off)
+6. Open `%APPDATA%\OuterWildsModManager\OWML\Logs\latest.txt` and search for `[HeadTracking]`.
+   You should see `Initialized, listening on UDP port 4242` and then
+   `Connection from LOCAL source` (or `REMOTE`) once the tracker's packets arrive.
+   That line is written whether or not tracking is enabled and whether or not you
+   are in gameplay, so no `Connection from` line means nothing is reaching the port.
+   `Tracking enabled` / `Tracking disabled` records each press of **End**
 
 ### Camera jittering
 
@@ -86,7 +91,12 @@ Adjust the sensitivity values in mod settings. Negative values invert the axis.
 
 ### Center position drifts over time
 
-Press **Home** to recenter at any time. Some phone tracking apps may drift slightly over extended play sessions.
+Centre it again in your tracking app. Some phone tracking apps may drift slightly over extended play sessions.
+
+### Reporting a problem
+
+Send `%APPDATA%\OuterWildsModManager\OWML\Logs\latest.txt`. OWML starts it fresh
+on every launch, so it only holds the session you just played.
 
 ## Configuration
 

@@ -42,7 +42,6 @@ Two equivalent binding sets - use whichever your keyboard has:
 
 | Action              | Nav-cluster | Chord           |
 |---------------------|-------------|-----------------|
-| Recenter            | `Home`      | `Ctrl+Shift+T`  |
 | Toggle tracking     | `End`       | `Ctrl+Shift+Y`  |
 | Cycle tracking mode | `Page Up`   | `Ctrl+Shift+G`  |
 

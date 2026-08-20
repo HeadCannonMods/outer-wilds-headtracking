@@ -96,24 +96,26 @@ namespace OuterWildsHeadTracking.Tracking
         /// Selects which smoothing parameter applies: LocalSmoothing for loopback senders,
         /// RemoteSmoothing for a remote network device.
         /// </summary>
-        public bool IsRemoteSource
+        public bool IsRemoteSource => _receiver?.IsRemoteConnection ?? false;
+
+        /// <summary>
+        /// Latches one line the first time packets arrive. Called from the mod's
+        /// Update, not from the camera patch: whether anything reached the port
+        /// must be answerable from the log while the player sits in a menu, is
+        /// paused, or has tracking toggled off.
+        /// </summary>
+        public void LogConnectionOnce()
         {
-            get
+            if (_loggedConnection || !(_receiver?.IsReceiving ?? false))
             {
-                bool isRemote = _receiver?.IsRemoteConnection ?? false;
-
-                // Log connection type once when we start receiving
-                if (!_loggedConnection && (_receiver?.IsReceiving ?? false))
-                {
-                    _loggedConnection = true;
-                    string sourceType = isRemote ? "REMOTE" : "LOCAL";
-                    HeadTrackingMod.Instance?.ModHelper?.Console.WriteLine(
-                        $"[HeadTracking] Connection from {sourceType} source",
-                        OWMLCommon::OWML.Common.MessageType.Info);
-                }
-
-                return isRemote;
+                return;
             }
+
+            _loggedConnection = true;
+            string sourceType = IsRemoteSource ? "REMOTE" : "LOCAL";
+            HeadTrackingMod.Instance?.ModHelper?.Console.WriteLine(
+                $"[HeadTracking] Connection from {sourceType} source",
+                OWMLCommon::OWML.Common.MessageType.Info);
         }
 
         /// <summary>
@@ -139,30 +141,6 @@ namespace OuterWildsHeadTracking.Tracking
             return _positionProcessor.Process(interpolatedPos, headRotQ, deltaTime);
         }
 
-        /// <summary>
-        /// Sets the current position as the center offset.
-        /// </summary>
-        public void RecenterPosition()
-        {
-            if (_receiver == null || _positionProcessor == null) return;
-            _positionProcessor.SetCenter(_receiver.GetLatestPosition());
-            _positionInterpolator?.Reset();
-        }
-
-        public bool TryConsumeRecenterRequest()
-        {
-            return _receiver?.TryConsumeRecenterRequest() ?? false;
-        }
-
-        /// <summary>
-        /// Resets position processing state.
-        /// </summary>
-        public void ResetPositionProcessor()
-        {
-            _positionProcessor?.Reset();
-            _positionInterpolator?.Reset();
-        }
-
         public void Shutdown()
         {
             _receiver?.Dispose();
@@ -181,7 +159,7 @@ namespace OuterWildsHeadTracking.Tracking
 
         /// <summary>
         /// Gets processed rotation values using TrackingProcessor.
-        /// Applies center offset and sensitivity (with pitch inversion).
+        /// Applies sensitivity (with pitch inversion).
         /// </summary>
         /// <param name="deltaTime">Frame delta time.</param>
         /// <returns>Processed rotation (Yaw, Pitch, Roll) in degrees, or null if no valid data.</returns>
@@ -202,29 +180,6 @@ namespace OuterWildsHeadTracking.Tracking
                 Pitch = processed.Pitch,
                 Roll = processed.Roll
             };
-        }
-
-        /// <summary>
-        /// Sets the specified raw pose as the new center point.
-        /// Future processed rotations will be relative to this center.
-        /// </summary>
-        public void SetCenter(RawEulerAngles rawAngles)
-        {
-            if (_processor == null) return;
-            var pose = new TrackingPose(rawAngles.Yaw, rawAngles.Pitch, rawAngles.Roll, 0);
-            _processor.RecenterTo(pose);
-            _poseInterpolator?.Reset();
-            RecenterPosition();
-        }
-
-        /// <summary>
-        /// Resets the processor state (clears center offset).
-        /// </summary>
-        public void ResetProcessor()
-        {
-            _processor?.Reset();
-            _poseInterpolator?.Reset();
-            ResetPositionProcessor();
         }
 
         public struct ProcessedRotation
